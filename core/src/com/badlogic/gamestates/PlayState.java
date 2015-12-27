@@ -67,6 +67,18 @@ public class PlayState extends GameState{
         }
     }
 
+    //break a big asteroid into 2 smaller asteroids when a bullet hits it
+    private void splitAsteroid(Asteroid a){
+        numAsteroidsLeft--;
+        if(a.getType()==Asteroid.LARGE){
+            asteroids.add(new Asteroid(a.getx(),a.gety(),Asteroid.MEDIUM));
+            asteroids.add(new Asteroid(a.getx(),a.gety(),Asteroid.MEDIUM));
+        }if(a.getType()==Asteroid.MEDIUM){
+            asteroids.add(new Asteroid(a.getx(),a.gety(),Asteroid.SMALL));
+            asteroids.add(new Asteroid(a.getx(),a.gety(),Asteroid.SMALL));
+        }
+    }
+
     @Override
     public void update(float dt) {
         handleInput();
@@ -91,6 +103,31 @@ public class PlayState extends GameState{
             }
         }
 
+        //check for collisions
+        checkCollisions();
+
+    }
+
+    private void checkCollisions(){
+
+        //asteroid-bullet collision
+        for(int i=0;i<bullets.size();i++){
+            Bullet b = bullets.get(i);
+            for(int j=0;j<asteroids.size();j++){
+                Asteroid a = asteroids.get(j);
+                //check if the asteroid contains the bullet
+                //i.e. check if a polygon contains a point
+                //even odd winding rule
+                if(a.contains(b.getx(),b.gety())){      //if a collision has occurred, remove the bullet, asteroid and split the asteroid into 2
+                    bullets.remove(i);
+                    i--;
+                    asteroids.remove(j);
+                    j--;
+                    splitAsteroid(a);
+                    break;
+                }
+            }
+        }
     }
 
     @Override
@@ -102,7 +139,7 @@ public class PlayState extends GameState{
         for(int i=0;i<bullets.size();i++)
             bullets.get(i).draw(sr);
 
-        //draw the aseroids
+        //draw the asteroids
         for(int i=0;i<asteroids.size();i++)
             asteroids.get(i).draw(sr);
     }

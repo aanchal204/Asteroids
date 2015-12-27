@@ -34,12 +34,45 @@ public class SpaceObject {
     protected float[] shapex;
     protected float[] shapey;
 
+    //getter methods
     public float getx(){
         return x;
     }
 
     public float gety(){
         return y;
+    }
+
+    public float[] getShapex(){
+        return shapex;
+    }
+
+    public float[] getShapey(){
+        return shapey;
+    }
+
+    //check if a polygon contains a point
+    //from the point, extend a horizontal line towards the right and find the number of times the lise intersects the polygon
+    // even : point lies outside
+    //odd : point lies inside
+    public boolean contains(float x , float y){
+        boolean b = false;
+        for(int i=0,j=shapex.length-1;i<shapex.length;j=i++){
+            if(((y<shapey[i]) != (y<shapey[j]) ) &&     //if the y coordinate of the point lies between the y coordinates of the line
+                    //if the point lies below the y coordinates of the end points of the line, or above both of them,
+                    //then it is not possible for the horizontal line to intersect the line of the polygon
+                    (x < ((y-shapey[i]) * (shapex[j] - shapex[i]) / (shapey[j] - shapey[i])  + shapex[i]) ) ){
+                //hint: make use of slopes
+                //let x1 y1 and x2 y2 be the end points of the line
+                //slope m1 = (y2-y1)/(x2-x1)
+                //slope of line between x y and x1 y1: m2= (y1-y)/(x1-x)
+                //since we draw a horizontal line towards the right, it will intersect only if m2 > m1
+                //(y2-y1)/(x2-x1) > (y1-y)/(x1-x)
+                //solve for x to get the above inequality
+                b = !b;
+            }
+        }
+        return b;
     }
 
     //in case any object goes outside the screen, it should wrap around

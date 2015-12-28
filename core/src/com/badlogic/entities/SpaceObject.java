@@ -55,8 +55,9 @@ public class SpaceObject {
     public boolean intersects(SpaceObject other){
         float[] otherx = other.getShapex();
         float[] othery = other.getShapey();
+        //to detect intersections between polygons, check if any point in one polygon lies inside the other polygon
         for(int i=0;i<otherx.length;i++){
-            if(contains(otherx[i],othery[i])){
+            if(this.contains(otherx[i],othery[i])){
                 return true;
             }
         }

@@ -4,6 +4,8 @@ import com.badlogic.asteroids.Asteroids;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
 
+import java.awt.geom.Line2D;
+import java.awt.geom.Point2D;
 import java.util.ArrayList;
 
 /**
@@ -34,6 +36,19 @@ public class Player extends SpaceObject {
     //how many maximum no of bullets a player can have ?
     private final int MAX_BULLETS = 4;
 
+    //states of player
+    //player goes in to dead state after being hit
+    private boolean hit;
+    private boolean dead;
+
+    //represents the lines once the player explodes
+    private Line2D.Float[] hitLines;
+    //direction in which the lines should move
+    private Point2D.Float[] hitLinesVector;
+
+    private float hitTimer;
+    private float hitTime;
+
     public Player(ArrayList<Bullet> bullets) {
 
         this.bullets = bullets;
@@ -55,6 +70,10 @@ public class Player extends SpaceObject {
 
         flamex = new float[3];
         flamey = new float[3];
+
+        hit = false;
+        hitTime = 2;        //player will remain on the screen for 2 secs before respawning
+        hitTimer = 0;
 
     }
 
@@ -84,28 +103,71 @@ public class Player extends SpaceObject {
 
     }
 
-    public void setLeft(boolean b){
-        left = b;
-    }
-    public void setRight(boolean b){
-        right = b;
-    }
-    public void setUp(boolean b){
-        up = b;
+    public void setLeft(boolean b) { left = b; }
+    public void setRight(boolean b) { right = b; }
+    public void setUp(boolean b){ up = b; }
+    public boolean isHit(){
+        return hit;
     }
 
+    public boolean isDead(){
+        return dead;
+    }
+
+    //called when a player is hit
+    //player should respawn in the center of the screen
+    public void reset(){
+        x = Asteroids.WIDTH/2;
+        y = Asteroids.HEIGHT/2;
+        setShape();
+        dead = hit = false;
+    }
     public void shoot(){
         if(bullets.size()>=MAX_BULLETS)
             return ;
         bullets.add(new Bullet(x,y,radians));
     }
 
+    //called when the player is hit with an asteroid
     public void hit(){
-
+        if(hit)
+            return;
+        hit = true;
+        //stop the player from moving
+        dx = dy = 0;
+        //disable the keys
+        left = right = up = false;
+        hitLines = new Line2D.Float[4];
+        for(int i=0,j=hitLines.length-1;
+            i<hitLines.length;
+            j=i++){
+            hitLines[i] = new Line2D.Float(shapex[i],shapey[i],shapex[j],shapey[j]);
+        }
+        hitLinesVector = new Point2D.Float[4];
+        hitLinesVector[0] = new Point2D.Float(MathUtils.cos(radians + 1.5f) , MathUtils.sin(radians + 1.5f));
+        hitLinesVector[1] = new Point2D.Float(MathUtils.cos(radians - 1.5f) , MathUtils.sin(radians - 1.5f));
+        hitLinesVector[2] = new Point2D.Float(MathUtils.cos(radians + 2.8f) , MathUtils.sin(radians + 2.8f));
+        hitLinesVector[3] = new Point2D.Float(MathUtils.cos(radians - 2.8f) , MathUtils.sin(radians - 2.8f));
     }
 
     public void update(float dt){       //delta time
 
+        if(hit){
+            hitTimer+=dt;
+            if(hitTimer > hitTime){
+                dead = true;
+                hitTimer = 0;
+            }
+            for(int i=0;i<hitLines.length;i++){
+                hitLines[i].setLine(
+                        hitLines[i].x1 + hitLinesVector[i].x * 10 *dt,
+                        hitLines[i].y1 + hitLinesVector[i].y * 10 *dt,
+                        hitLines[i].x2 + hitLinesVector[i].x * 10 *dt,
+                        hitLines[i].y2 + hitLinesVector[i].y * 10 *dt
+                         );
+            }
+            return ;
+        }
         //turning
         if(left)
             radians += rotationSpeed*dt;
@@ -152,18 +214,31 @@ public class Player extends SpaceObject {
         //draw the polygon as a set of connected lines
         sr.begin(ShapeRenderer.ShapeType.Line);
 
+        if(hit){
+            for(int i=0;i<hitLines.length;i++){
+                sr.line(
+                        hitLines[i].x1,
+                        hitLines[i].y1,
+                        hitLines[i].x2,
+                        hitLines[i].y2
+                );
+            }
+            sr.end();
+            return;
+        }
+
         int i;
         for(i=0;i<shapex.length-1;i++){
             sr.line(shapex[i],shapey[i],shapex[i+1],shapey[i+1]);
         }
-        sr.line(shapex[i],shapey[i],shapex[0],shapey[0]);
+        sr.line(shapex[i], shapey[i], shapex[0], shapey[0]);
 
         //draw the flames
         if(up){
             for(i=0;i<flamex.length-1;i++){
                 sr.line(flamex[i],flamey[i],flamex[i+1],flamey[i+1]);
             }
-            sr.line(flamex[i],flamey[i],flamex[0],flamey[0]);
+            sr.line(flamex[i], flamey[i], flamex[0], flamey[0]);
         }
 
         sr.end();

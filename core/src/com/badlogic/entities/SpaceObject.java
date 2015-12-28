@@ -51,6 +51,18 @@ public class SpaceObject {
         return shapey;
     }
 
+    //polygon-polygon intersection
+    public boolean intersects(SpaceObject other){
+        float[] otherx = other.getShapex();
+        float[] othery = other.getShapey();
+        for(int i=0;i<otherx.length;i++){
+            if(contains(otherx[i],othery[i])){
+                return true;
+            }
+        }
+        return false;
+    }
+
     //check if a polygon contains a point
     //from the point, extend a horizontal line towards the right and find the number of times the lise intersects the polygon
     // even : point lies outside

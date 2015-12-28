@@ -110,6 +110,19 @@ public class PlayState extends GameState{
 
     private void checkCollisions(){
 
+        //asteroid-player collision
+        //check for polygon-polygon intersection
+        for(int i=0;i<asteroids.size();i++){
+            Asteroid a = asteroids.get(i);
+            if(a.intersects(player)){
+                player.hit();
+                asteroids.remove(i);
+                i--;
+                splitAsteroid(a);
+                break;
+            }
+        }
+
         //asteroid-bullet collision
         for(int i=0;i<bullets.size();i++){
             Bullet b = bullets.get(i);

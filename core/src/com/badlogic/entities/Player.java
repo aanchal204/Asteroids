@@ -100,6 +100,10 @@ public class Player extends SpaceObject {
         bullets.add(new Bullet(x,y,radians));
     }
 
+    public void hit(){
+
+    }
+
     public void update(float dt){       //delta time
 
         //turning

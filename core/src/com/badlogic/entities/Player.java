@@ -49,6 +49,10 @@ public class Player extends SpaceObject {
     private float hitTimer;
     private float hitTime;
 
+    private long score;
+    private int extraLives;
+    private long requiredScore; //score required to get an extra life
+
     public Player(ArrayList<Bullet> bullets) {
 
         this.bullets = bullets;
@@ -75,6 +79,9 @@ public class Player extends SpaceObject {
         hitTime = 2;        //player will remain on the screen for 2 secs before respawning
         hitTimer = 0;
 
+        score = 0;
+        extraLives = 3;
+        requiredScore = 10000;
     }
 
     public void setShape(){
@@ -109,10 +116,15 @@ public class Player extends SpaceObject {
     public boolean isHit(){
         return hit;
     }
+    public boolean isDead(){ return dead; }
 
-    public boolean isDead(){
-        return dead;
+    public long getScore(){ return score;}
+    public int getLives(){ return extraLives; }
+    public void loseLives() { extraLives --; }
+    public void incrementScore(long l){
+        score += l;
     }
+
 
     //called when a player is hit
     //player should respawn in the center of the screen
@@ -168,6 +180,13 @@ public class Player extends SpaceObject {
             }
             return ;
         }
+
+        //check extra lives
+        if(score >= requiredScore){
+            extraLives++;
+            requiredScore += 10000;
+        }
+
         //turning
         if(left)
             radians += rotationSpeed*dt;

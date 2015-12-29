@@ -7,6 +7,9 @@ import com.badlogic.entities.Particle;
 import com.badlogic.entities.Player;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.managers.GameStateManager;
@@ -34,6 +37,10 @@ public class PlayState extends GameState{
     private int totalAsteroids;
     private int numAsteroidsLeft;
 
+    //used to draw fonts, images, textures
+    private SpriteBatch batch;
+    private BitmapFont font;
+
     public PlayState(GameStateManager gsm){
         super(gsm);
     }
@@ -48,6 +55,15 @@ public class PlayState extends GameState{
 
         level = 1;
         spawnAsteroid();
+
+        batch = new SpriteBatch();
+
+        //set font
+        FreeTypeFontGenerator gen = new
+                FreeTypeFontGenerator(Gdx.files.internal("fonts/Hyperspace Bold.ttf")); //file stored in assets folder
+        FreeTypeFontGenerator.FreeTypeFontParameter parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
+        parameter.size = 20;
+        font = gen.generateFont(parameter);    //size=20
     }
 
     //creates a new set of asteroids
@@ -119,6 +135,7 @@ public class PlayState extends GameState{
         player.update(dt);
         if(player.isDead()) {
             player.reset();
+            player.loseLives();
             return;
         }
 
@@ -180,12 +197,13 @@ public class PlayState extends GameState{
                 //check if the asteroid contains the bullet
                 //i.e. check if a polygon contains a point
                 //even odd winding rule
-                if(a.contains(b.getx(),b.gety())){      //if a collision has occurred, remove the bullet, asteroid and split the asteroid into 2
+                if(a.contains(b.getx(),b.gety())){      //if a collision has occurred, remove the bullet, asteroid and split the asteroid into 2, and increment the score
                     bullets.remove(i);
                     i--;
                     asteroids.remove(j);
                     j--;
                     splitAsteroid(a);
+                    player.incrementScore(a.getScore());
                     break;
                 }
             }
@@ -208,6 +226,12 @@ public class PlayState extends GameState{
         //draw the particles
         for(int i=0;i<particles.size();i++)
             particles.get(i).draw(sr);
+
+        //draw the score
+        batch.setColor(1,1,1,1);
+        batch.begin();
+        font.draw(batch,Long.toString(player.getScore()),40,390);       //position to draw
+        batch.end();
     }
 
     @Override

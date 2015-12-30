@@ -5,6 +5,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.managers.GameStateManager;
+import com.badlogic.managers.Jukebox;
 
 public class Asteroids extends ApplicationAdapter {
 
@@ -24,6 +25,15 @@ public class Asteroids extends ApplicationAdapter {
 		camera.setToOrtho(false, WIDTH, HEIGHT);		//boolean yDown, width, height
 		//Sets this camera to an orthographic projection, centered at (Width/2, Height/2), with the y-axis pointing up or down.
 		camera.update();
+
+		//loading the sounds needed during the game
+		Jukebox.load("explode", "sounds/explode.ogg");
+		Jukebox.load("extralife", "sounds/extralife.ogg");
+		Jukebox.load("pulsehigh","sounds/pulsehigh.ogg");
+		Jukebox.load("pulselow","sounds/pulselow.ogg");
+		Jukebox.load("shoot","sounds/shoot.ogg");
+		Jukebox.load("thruster","sounds/thruster.ogg");
+
 
 		gsm = new GameStateManager();
 

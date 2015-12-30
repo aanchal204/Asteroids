@@ -3,6 +3,7 @@ package com.badlogic.entities;
 import com.badlogic.asteroids.Asteroids;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.managers.Jukebox;
 
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
@@ -112,7 +113,13 @@ public class Player extends SpaceObject {
 
     public void setLeft(boolean b) { left = b; }
     public void setRight(boolean b) { right = b; }
-    public void setUp(boolean b){ up = b; }
+    public void setUp(boolean b){
+        if(b && !up && !hit)
+            Jukebox.loop("thruster");
+        else if(!b)
+            Jukebox.stop("thruster");
+        up = b;
+    }
     public boolean isHit(){
         return hit;
     }
@@ -125,6 +132,11 @@ public class Player extends SpaceObject {
         score += l;
     }
 
+    //set the position of the extra Lives Player
+    public void setPosition(float x, float y){
+        super.setPosition(x,y);
+        setShape();
+    }
 
     //called when a player is hit
     //player should respawn in the center of the screen
@@ -138,6 +150,7 @@ public class Player extends SpaceObject {
         if(bullets.size()>=MAX_BULLETS)
             return ;
         bullets.add(new Bullet(x,y,radians));
+        Jukebox.play("shoot");
     }
 
     //called when the player is hit with an asteroid
@@ -149,6 +162,8 @@ public class Player extends SpaceObject {
         dx = dy = 0;
         //disable the keys
         left = right = up = false;
+        //stop the thruster sound
+        Jukebox.stop("thruster");
         hitLines = new Line2D.Float[4];
         for(int i=0,j=hitLines.length-1;
             i<hitLines.length;
@@ -185,6 +200,7 @@ public class Player extends SpaceObject {
         if(score >= requiredScore){
             extraLives++;
             requiredScore += 10000;
+            Jukebox.play("extralife");
         }
 
         //turning

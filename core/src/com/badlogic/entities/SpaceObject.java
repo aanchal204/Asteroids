@@ -95,4 +95,10 @@ public class SpaceObject {
         if(y>Asteroids.HEIGHT) y=0;
         if(y<0) y = Asteroids.HEIGHT;
     }
+
+    //set the position of the object
+    public void setPosition(float x, float y){
+        this.x = x;
+        this.y = y;
+    }
 }

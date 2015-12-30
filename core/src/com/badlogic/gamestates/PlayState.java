@@ -13,6 +13,7 @@ import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.managers.GameStateManager;
+import com.badlogic.managers.Jukebox;
 
 import java.util.ArrayList;
 
@@ -41,6 +42,9 @@ public class PlayState extends GameState{
     private SpriteBatch batch;
     private BitmapFont font;
 
+    //extra Lives Player
+    Player extraLivesPlayer;
+
     public PlayState(GameStateManager gsm){
         super(gsm);
     }
@@ -64,6 +68,8 @@ public class PlayState extends GameState{
         FreeTypeFontGenerator.FreeTypeFontParameter parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
         parameter.size = 20;
         font = gen.generateFont(parameter);    //size=20
+
+        extraLivesPlayer = new Player(null);
     }
 
     //creates a new set of asteroids
@@ -182,7 +188,9 @@ public class PlayState extends GameState{
                     player.hit();
                     asteroids.remove(i);
                     i--;
+                    //should the asteroid break when it hits the player?
                     splitAsteroid(a);
+                    Jukebox.play("explode");
                     break;
                 }
             }
@@ -204,6 +212,7 @@ public class PlayState extends GameState{
                     j--;
                     splitAsteroid(a);
                     player.incrementScore(a.getScore());
+                    Jukebox.play("explode");
                     break;
                 }
             }
@@ -232,6 +241,13 @@ public class PlayState extends GameState{
         batch.begin();
         font.draw(batch,Long.toString(player.getScore()),40,390);       //position to draw
         batch.end();
+
+
+        //draw the extraLives
+        for(int i=0;i<player.getLives();i++){
+            extraLivesPlayer.setPosition(40 + 10*i , 360);
+            extraLivesPlayer.draw(sr);
+        }
     }
 
     @Override

@@ -1,6 +1,7 @@
 package com.badlogic.managers;
 
 import com.badlogic.gamestates.GameState;
+import com.badlogic.gamestates.MenuState;
 import com.badlogic.gamestates.PlayState;
 
 /**
@@ -13,14 +14,14 @@ public class GameStateManager {
     public static final int PLAY = 1;
 
     public GameStateManager(){
-        setState(PLAY);
+        setState(MENU);
     }
 
     public void setState(int state){
         if(gameState!=null) gameState.dispose();
         if(state == MENU){
             //switch to menu state
-            //gameState = new MenuState(this);
+            gameState = new MenuState(this);
         }
         if(state == PLAY){
             //switch to play state

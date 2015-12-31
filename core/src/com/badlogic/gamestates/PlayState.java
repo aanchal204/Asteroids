@@ -42,8 +42,15 @@ public class PlayState extends GameState{
     private SpriteBatch batch;
     private BitmapFont font;
 
-    //extra Lives Player
+    //extra Lives Player : to draw the extra lives
     Player extraLivesPlayer;
+
+    //playing the background music
+    private float maxDelay;
+    private float minDelay;
+    private float currentDelay;
+    private float bgTimer;
+    private boolean playLowPulse;
 
     public PlayState(GameStateManager gsm){
         super(gsm);
@@ -70,6 +77,15 @@ public class PlayState extends GameState{
         font = gen.generateFont(parameter);    //size=20
 
         extraLivesPlayer = new Player(null);
+
+        maxDelay = 1;
+        minDelay = 0.25f;
+        currentDelay = maxDelay;
+        bgTimer = 0;    //bg music will play when the bgtimer becomes >= current delay
+        //and the current delay decreases as the asteroids decrease in number
+        //hence as the level proceeds, and more asteroids are destroyed,
+        //the music is played with higher frequency
+        playLowPulse = false;
     }
 
     //creates a new set of asteroids
@@ -79,6 +95,8 @@ public class PlayState extends GameState{
         int numToSpawn = 3 + level;
         totalAsteroids = 7*numToSpawn;
         numAsteroidsLeft = totalAsteroids;
+        //every time a player enters a new level, reset the current Delay
+        currentDelay = maxDelay;
 
         for(int i=0;i<numToSpawn;i++){
             float x = MathUtils.random(Asteroids.WIDTH);
@@ -118,6 +136,8 @@ public class PlayState extends GameState{
     private void splitAsteroid(Asteroid a){
         createParticles(a.getx(), a.gety(), a.getType());
         numAsteroidsLeft--;
+        //as asteroids are destroyed, the currentDelay should be reduces
+        currentDelay = ((maxDelay - minDelay) * numAsteroidsLeft/totalAsteroids) + minDelay;
         if(a.getType()==Asteroid.LARGE){
             asteroids.add(new Asteroid(a.getx(),a.gety(),Asteroid.MEDIUM));
             asteroids.add(new Asteroid(a.getx(),a.gety(),Asteroid.MEDIUM));
@@ -174,6 +194,17 @@ public class PlayState extends GameState{
 
         //check for collisions
         checkCollisions();
+
+        //play the background timer
+        bgTimer += dt;
+        if(!player.isHit() && bgTimer>=currentDelay){
+            if(playLowPulse)
+                Jukebox.play("pulselow");
+            else
+                Jukebox.play("pulsehigh");
+            playLowPulse = !playLowPulse;
+            bgTimer = 0;
+        }
 
     }
 

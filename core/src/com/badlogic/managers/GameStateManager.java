@@ -1,6 +1,7 @@
 package com.badlogic.managers;
 
 import com.badlogic.gamestates.GameState;
+import com.badlogic.gamestates.HighScoreState;
 import com.badlogic.gamestates.MenuState;
 import com.badlogic.gamestates.PlayState;
 
@@ -12,6 +13,7 @@ public class GameStateManager {
     private GameState gameState;
     public static final int MENU = 0;
     public static final int PLAY = 1;
+    public static final int HIGHSCORE = 2;
 
     public GameStateManager(){
         setState(MENU);
@@ -26,6 +28,9 @@ public class GameStateManager {
         if(state == PLAY){
             //switch to play state
             gameState = new PlayState(this);
+        }
+        if(state == HIGHSCORE){
+            gameState = new HighScoreState(this);
         }
     }
 

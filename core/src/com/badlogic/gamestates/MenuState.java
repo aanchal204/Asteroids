@@ -115,9 +115,8 @@ public class MenuState extends GameState {
     public void select(){
         if(currentItem==0)
             gsm.setState(GameStateManager.PLAY);
-        else if(currentItem==1) {
-            //gsm.setState(GameStateManager.HIGHSCORES);
-        }
+        else if(currentItem==1)
+            gsm.setState(GameStateManager.HIGHSCORE);
         else if(currentItem==2)
             Gdx.app.exit();
     }

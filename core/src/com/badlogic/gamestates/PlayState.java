@@ -14,6 +14,7 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.managers.GameStateManager;
 import com.badlogic.managers.Jukebox;
+import com.badlogic.managers.SaveGame;
 
 import java.util.ArrayList;
 
@@ -160,8 +161,14 @@ public class PlayState extends GameState{
         //update the player
         player.update(dt);
         if(player.isDead()) {
-            if(player.getLives() == 0)
-                gsm.setState(GameStateManager.MENU);
+            if(player.getLives() == 0) {
+                if(SaveGame.gameData == null)
+                    SaveGame.load();
+                Jukebox.stopAll();
+                SaveGame.gameData.setTempScore(player.getScore());
+                gsm.setState(GameStateManager.GAMEOVER);
+                return;
+            }
             player.reset();
             player.loseLives();
             return;

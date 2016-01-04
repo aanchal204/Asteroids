@@ -60,12 +60,12 @@ public class GameData implements Serializable {
             long score = scores[i];
             String name = names[i];
             int j;
-            for(j=i-1;j>=0 && scores[j]<score;j++){
+            for(j=i-1;j>=0 && scores[j]<score;j--){
                 scores[j+1] = scores[j];
                 names[j+1] = names[j];
             }
-            scores[j] = score;
-            names[j] = name;
+            scores[j + 1] = score;
+            names[j + 1] = name;
         }
     }
 }

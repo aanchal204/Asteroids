@@ -44,7 +44,7 @@ public class PlayState extends GameState{
     private BitmapFont font;
 
     //extra Lives Player : to draw the extra lives
-    Player extraLivesPlayer;
+    private Player extraLivesPlayer;
 
     //playing the background music
     private float maxDelay;
@@ -261,6 +261,10 @@ public class PlayState extends GameState{
 
     @Override
     public void draw() {
+
+        //depending on the window size, the size of the objects is scaled
+        batch.setProjectionMatrix(Asteroids.camera.combined);
+        sr.setProjectionMatrix(Asteroids.camera.combined);
         //draw the player
         player.draw(sr);
 
@@ -292,15 +296,19 @@ public class PlayState extends GameState{
 
     @Override
     public void handleInput() {
-        player.setLeft(Gdx.input.isKeyPressed(Input.Keys.LEFT));
-        player.setRight(Gdx.input.isKeyPressed(Input.Keys.RIGHT));
-        player.setUp(Gdx.input.isKeyPressed(Input.Keys.UP));
-        if(Gdx.input.isKeyJustPressed(Input.Keys.SPACE))
-            player.shoot();
+        if(!player.isHit()) {
+            player.setLeft(Gdx.input.isKeyPressed(Input.Keys.LEFT));
+            player.setRight(Gdx.input.isKeyPressed(Input.Keys.RIGHT));
+            player.setUp(Gdx.input.isKeyPressed(Input.Keys.UP));
+            if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE))
+                player.shoot();
+        }
     }
 
     @Override
     public void dispose() {
-
+        batch.dispose();
+        font.dispose();
+        sr.dispose();
     }
 }

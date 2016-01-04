@@ -67,6 +67,7 @@ public class GameOverState extends GameState {
     public void draw() {
 
         batch.setProjectionMatrix(Asteroids.camera.combined);
+        sr.setProjectionMatrix(Asteroids.camera.combined);
         batch.begin();
 
         //title: Game Over
@@ -134,6 +135,9 @@ public class GameOverState extends GameState {
 
     @Override
     public void dispose() {
-
+        batch.dispose();
+        sr.dispose();
+        gameOverFont.dispose();
+        font.dispose();
     }
 }

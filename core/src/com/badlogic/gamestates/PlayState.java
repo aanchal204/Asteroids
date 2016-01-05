@@ -3,6 +3,7 @@ package com.badlogic.gamestates;
 import com.badlogic.asteroids.Asteroids;
 import com.badlogic.entities.Asteroid;
 import com.badlogic.entities.Bullet;
+import com.badlogic.entities.FlyingSaucer;
 import com.badlogic.entities.Particle;
 import com.badlogic.entities.Player;
 import com.badlogic.gdx.Gdx;
@@ -23,6 +24,7 @@ import java.util.ArrayList;
  */
 public class PlayState extends GameState{
 
+    //play state has the space objects : player, its bullets, asteroids, particles, flying saucers and its bullets
     private ShapeRenderer sr;
     private Player player;
     private ArrayList<Bullet> bullets;
@@ -34,6 +36,10 @@ public class PlayState extends GameState{
 
     private ArrayList<Asteroid> asteroids;
     private ArrayList<Particle> particles;
+    private ArrayList<Bullet> enemyBullets;
+    private FlyingSaucer flyingSaucer;
+    private float fsTimer;
+    private float fsTime;
 
     private int level;
     private int totalAsteroids;
@@ -78,6 +84,11 @@ public class PlayState extends GameState{
         font = gen.generateFont(parameter);    //size=20
 
         extraLivesPlayer = new Player(null);
+
+        //saucer timer
+        fsTimer = 0;
+        fsTime = 15;    //saucer will come every 15 seconds
+        enemyBullets = new ArrayList<Bullet>();
 
         maxDelay = 1;
         minDelay = 0.25f;
@@ -171,7 +182,43 @@ public class PlayState extends GameState{
             }
             player.reset();
             player.loseLives();
+            if(flyingSaucer!=null)
+                flyingSaucer.destroyFlyingSaucer();
+            flyingSaucer = null;
             return;
+        }
+
+        //update the flying saucer
+        //flying saucer appears only after the timer expires
+        if(flyingSaucer == null){
+            fsTimer += dt;
+            if(fsTimer >= fsTime){
+                fsTimer = 0;
+                int type = MathUtils.random() > 0.5 ? FlyingSaucer.LARGE : FlyingSaucer.SMALL;
+                int direction = MathUtils.random() > 0.5 ? FlyingSaucer.LEFT : FlyingSaucer.RIGHT;
+                flyingSaucer = new FlyingSaucer(type,direction,enemyBullets,player);
+            }
+        }
+        //if the flying saucer is already present
+        else{
+            flyingSaucer.update(dt);
+            if(flyingSaucer.shouldRemove()){
+                if(flyingSaucer.getType() == FlyingSaucer.LARGE)
+                    Jukebox.stop("largesaucer");
+                else if(flyingSaucer.getType() == FlyingSaucer.SMALL)
+                    Jukebox.stop("smallsaucer");
+                flyingSaucer = null;
+
+            }
+        }
+
+        //update the enemy bullets
+        for(int i=0;i<enemyBullets.size();i++){
+            enemyBullets.get(i).update(dt);
+            if(enemyBullets.get(i).shouldRemove()){
+                enemyBullets.remove(i);
+                i--;
+            }
         }
 
         //update the bullets
@@ -257,6 +304,82 @@ public class PlayState extends GameState{
                 }
             }
         }
+
+        //player-enemy bullet collision
+        if(!player.isHit()){
+            for(int i=0; i<enemyBullets.size();i++){
+                Bullet b = enemyBullets.get(i);
+                if(player.contains(b.getx(),b.gety())){
+                    player.hit();
+                    enemyBullets.remove(i);
+                    i--;
+                    Jukebox.play("explode");
+                    break;
+                }
+            }
+        }
+
+        //flying saucer-bullet collision
+        if(flyingSaucer!=null){
+            for(int i=0;i<bullets.size();i++){
+                Bullet b = bullets.get(i);
+                if(flyingSaucer.contains(b.getx(),b.gety())){
+                    player.incrementScore(flyingSaucer.getScore());
+                    bullets.remove(i);
+                    i--;
+                    createParticles(flyingSaucer.getx(),flyingSaucer.gety(),flyingSaucer.getType());
+                    flyingSaucer.destroyFlyingSaucer();
+                    flyingSaucer = null;
+                    Jukebox.play("explode");
+                    break;
+                }
+            }
+        }
+
+        //asteroid-enemy bullet collision
+        for(int i=0;i<enemyBullets.size();i++){
+            Bullet b = enemyBullets.get(i);
+            for(int j=0;j<asteroids.size();j++){
+                Asteroid a = asteroids.get(j);
+                if(a.contains(b.getx(),b.gety())){
+                    enemyBullets.remove(i);
+                    i--;
+                    asteroids.remove(j);
+                    j--;
+                    splitAsteroid(a);
+                    Jukebox.play("explode");
+                    break;
+                }
+            }
+        }
+
+        //flying saucer-player collision
+        if(flyingSaucer!=null){
+            if(flyingSaucer.intersects(player)){
+                player.hit();
+                createParticles(flyingSaucer.getx(), flyingSaucer.gety(), flyingSaucer.getType());
+                flyingSaucer.destroyFlyingSaucer();
+                flyingSaucer = null;
+                Jukebox.play("explode");
+            }
+        }
+
+        //flying saucer-asteroid collision
+        if(flyingSaucer!=null){
+            for(int i=0;i<asteroids.size();i++){
+                Asteroid a = asteroids.get(i);
+                if(flyingSaucer.intersects(a)){
+                    asteroids.remove(i);
+                    i--;
+                    splitAsteroid(a);
+                    createParticles(flyingSaucer.getx(), flyingSaucer.gety(), flyingSaucer.getType());
+                    flyingSaucer.destroyFlyingSaucer();
+                    flyingSaucer = null;
+                    Jukebox.play("explode");
+                    break;
+                }
+            }
+        }
     }
 
     @Override
@@ -271,6 +394,14 @@ public class PlayState extends GameState{
         //draw the bullets
         for(int i=0;i<bullets.size();i++)
             bullets.get(i).draw(sr);
+
+        //draw the flying saucer
+        if(flyingSaucer != null)
+            flyingSaucer.draw(sr);
+
+        //draw the saucer's bullets
+        for(int i=0;i<enemyBullets.size();i++)
+            enemyBullets.get(i).draw(sr);
 
         //draw the asteroids
         for(int i=0;i<asteroids.size();i++)

@@ -29,11 +29,13 @@ public class Asteroids extends ApplicationAdapter {
 		//loading the sounds needed during the game
 		Jukebox.load("explode", "sounds/explode.ogg");
 		Jukebox.load("extralife", "sounds/extralife.ogg");
-		Jukebox.load("pulsehigh","sounds/pulsehigh.ogg");
+		Jukebox.load("pulsehigh", "sounds/pulsehigh.ogg");
 		Jukebox.load("pulselow","sounds/pulselow.ogg");
 		Jukebox.load("shoot","sounds/shoot.ogg");
 		Jukebox.load("thruster","sounds/thruster.ogg");
-
+		Jukebox.load("smallsaucer", "sounds/smallsaucer.ogg");
+		Jukebox.load("largesaucer", "sounds/largesaucer.ogg");
+		Jukebox.load("saucershoot", "sounds/saucershoot.ogg");
 
 		gsm = new GameStateManager();
 

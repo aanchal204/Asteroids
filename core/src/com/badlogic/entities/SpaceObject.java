@@ -61,6 +61,15 @@ public class SpaceObject {
                 return true;
             }
         }
+        //check both ways: a contains b or b contains a
+        //sometimes the asteroid is smaller than the player, and it passes through since all points of the player lies outside
+        //the asteroid
+        //fixed this bug
+        for(int i=0;i<this.getShapex().length;i++){
+            if(other.contains(this.getShapex()[i] , this.getShapey()[i])){
+                return true;
+            }
+        }
         return false;
     }
 
